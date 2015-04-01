@@ -20,19 +20,19 @@ public class Tone : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
-		foreach (var tone in GameObject.FindGameObjectsWithTag("Sphere")) {
-			if (tone != this.gameObject) {
-				var dist = (transform.position - tone.transform.position).magnitude;
-				if (dist < 5) {
-					var con = connections.AddConnection(this.gameObject, tone);	
-				}
+		//foreach (var tone in GameObject.FindGameObjectsWithTag("Sphere")) {
+		//	if (tone != this.gameObject) {
+		//		var dist = (transform.position - tone.transform.position).magnitude;
+		//		if (dist < 5) {
+		//			var con = connections.AddConnection(this.gameObject, tone);	
+		//		}
 				
-			}
-		}
+		//	}
+		//}
 	}
 
 	void LateUpdate() {
-		LocalConnections.Clear();
+		//LocalConnections.Clear();
 	}
 
 	public void Play() {

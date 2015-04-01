@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Connection {
 	public GameObject From;
@@ -35,38 +36,88 @@ public class Connections : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Cons = new List<Connection>();
+
+
 	}
 	
 	// Update is called once per frame
-	void Update () {	
-		var toRemove = new List<Connection>();
+	void Update () {
+		var spheres = from s in GameObject.FindGameObjectsWithTag("Sphere")
+					  orderby s.transform.position.x ascending
+					  select s;
 
-		foreach (var con in Cons) {
-			foreach (var con2 in Cons) {
+		var connected = new List<GameObject>();
 
-				var li = LineIntersectionPoint(con.FromPos, con.ToPos,
-												con2.FromPos, con2.ToPos);				
+		foreach (var s in spheres) {
 
-				if (li != Vector3.zero) {
-					
+			if (connected.Contains(s)) {
+				continue;
+			}
 
-					if (LineSegmentCheck(li, con.FromPos, con.ToPos) && LineSegmentCheck(li, con2.FromPos, con2.ToPos)) {
-						//Debug.DrawLine(con.FromPos, con.ToPos, Color.red);
-						//Debug.DrawLine(con2.FromPos, con2.ToPos, Color.red);
-						//Debug.DrawLine(li, li + Vector3.up / 3, Color.green);
 
-						toRemove.Add(con);
-						toRemove.Add(con2);
-					}
+			var far = GameObject.Find("FarAway");
+			GameObject closest = far;
+			GameObject secondClosest = far;
+			foreach (var s2 in spheres) {
+				if (s == s2) continue;
+
+				if (connected.Contains(s2)) {
+					continue;
+				}
+
+				var cDist = (s.transform.position - closest.transform.position).magnitude;
+				var scDist = (s.transform.position - secondClosest.transform.position).magnitude;
+				var newDist = (s.transform.position - s2.transform.position).magnitude;
+
+				if (newDist < cDist) {
+					secondClosest = closest;
+					closest = s2;
+				} else if (newDist < scDist) {
+					secondClosest = s2;
 				}
 			}
-		}
 
-		foreach (var con in toRemove) {
-			Cons.Remove(con);
+			if (closest != far && secondClosest != far) {
+				AddConnection(s, closest);
+				AddConnection(s, secondClosest);
 
-			con.From.GetComponent<Tone>().LocalConnections.Remove(con);
-		}
+				AddConnection(closest, secondClosest);
+
+				connected.Add(s);
+				connected.Add(closest);
+				connected.Add(secondClosest);
+			}
+
+		}	
+
+		//var toRemove = new List<Connection>();
+
+		//foreach (var con in Cons) {
+		//	foreach (var con2 in Cons) {
+
+		//		var li = LineIntersectionPoint(con.FromPos, con.ToPos,
+		//										con2.FromPos, con2.ToPos);				
+
+		//		if (li != Vector3.zero) {
+					
+
+		//			if (LineSegmentCheck(li, con.FromPos, con.ToPos) && LineSegmentCheck(li, con2.FromPos, con2.ToPos)) {
+		//				//Debug.DrawLine(con.FromPos, con.ToPos, Color.red);
+		//				//Debug.DrawLine(con2.FromPos, con2.ToPos, Color.red);
+		//				//Debug.DrawLine(li, li + Vector3.up / 3, Color.green);
+
+		//				toRemove.Add(con);
+		//				toRemove.Add(con2);
+		//			}
+		//		}
+		//	}
+		//}
+
+		//foreach (var con in toRemove) {
+		//	Cons.Remove(con);
+
+		//	con.From.GetComponent<Tone>().LocalConnections.Remove(con);
+		//}
 
 		foreach (var con in Cons) {
 			con.Update();
@@ -76,8 +127,6 @@ public class Connections : MonoBehaviour {
 
 			Debug.DrawLine(con.FromPos, con.ToPos);
 		}
-
-		var path = new List<GameObject>();
 
 		Cons.Clear();
 	}
