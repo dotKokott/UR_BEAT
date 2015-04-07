@@ -5,27 +5,31 @@ using System.Linq;
 
 public class Beat : MonoBehaviour {
 
-	public Tone StartTone;
-
 	private GameObject previousTarget;
-	private GameObject target;
+	public GameObject target;
 
 	public float Speed;
 
+	public int group = -1;
+
 	void Start () {
-		transform.position = StartTone.transform.position;
-		target = StartTone.Next.gameObject;
+		//transform.position = StartTone.transform.position;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (target == null) {
+			Destroy(this.gameObject);
+			return;
+		}
+
 		var dist = target.transform.position - transform.position;
 		if (dist.magnitude < 0.1f) {
 			transform.position = target.transform.position;
 
-			var targetTone = target.GetComponent<Tone>();
+			var targetTone = target.GetComponent<Tone>();			
 
-			targetTone.Play();
+			targetTone.Play(group);
 
 			GameObject newTarget = null;
 
